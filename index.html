@@ -1,0 +1,808 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StudyMind AI</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Light Theme (Default) */
+            --bg-body: #fafafa;
+            --bg-card: #ffffff;
+            --bg-input: #ffffff;
+            --text-main: #111111;
+            --text-muted: #666666;
+            --border: #eaeaea;
+            --border-hover: #999999;
+            --primary: #000000;
+            --primary-hover: #333333;
+            --primary-text: #ffffff;
+            --success: #0070f3;
+            --success-bg: rgba(0, 112, 243, 0.1);
+            --error: #e00;
+            --error-bg: #ffe6e6;
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.02);
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.04), 0 1px 3px rgba(0,0,0,0.08);
+            --shadow-hover: 0 8px 15px rgba(0,0,0,0.08);
+            --divider: #eaeaea;
+            --nav-bg: rgba(255, 255, 255, 0.8);
+        }
+
+        [data-theme="dark"] {
+            /* Dark Theme */
+            --bg-body: #0a0a0a;
+            --bg-card: #111111;
+            --bg-input: #000000;
+            --text-main: #ededed;
+            --text-muted: #a1a1aa;
+            --border: #333333;
+            --border-hover: #666666;
+            --primary: #ffffff;
+            --primary-hover: #cccccc;
+            --primary-text: #000000;
+            --success: #3291ff;
+            --success-bg: rgba(50, 145, 255, 0.15);
+            --error: #ff1a1a;
+            --error-bg: rgba(255, 26, 26, 0.15);
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.2);
+            --shadow-md: 0 4px 6px rgba(0,0,0,0.4), 0 1px 3px rgba(0,0,0,0.3);
+            --shadow-hover: 0 8px 20px rgba(0,0,0,0.5);
+            --divider: #333333;
+            --nav-bg: rgba(10, 10, 10, 0.8);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* HEADER */
+        header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background-color: var(--nav-bg);
+            backdrop-filter: blur(8px);
+            border-bottom: 1px solid var(--divider);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-weight: 700;
+            font-size: 1.25rem;
+            letter-spacing: -0.02em;
+            text-decoration: none;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .theme-toggle {
+            background: transparent;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text-main);
+            width: 36px;
+            height: 36px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .theme-toggle:hover {
+            border-color: var(--border-hover);
+            background-color: var(--bg-card);
+        }
+
+        .icon-sun, .icon-moon {
+            width: 18px;
+            height: 18px;
+        }
+
+        [data-theme="light"] .icon-sun { display: none; }
+        [data-theme="dark"] .icon-moon { display: none; }
+
+        /* MAIN CONTENT */
+        main {
+            flex-grow: 1;
+            width: 100%;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 3rem 2rem;
+            display: flex;
+            flex-direction: column;
+            gap: 2.5rem;
+        }
+
+        .section-header {
+            margin-bottom: 1.5rem;
+        }
+
+        .section-header h2 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+        }
+        
+        .section-header p {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            margin-top: 0.25rem;
+        }
+
+        .card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 2rem;
+            box-shadow: var(--shadow-sm);
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow-md);
+            border-color: var(--border-hover);
+        }
+
+        /* BUTTONS */
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: 1px solid transparent;
+            border-radius: 6px;
+            font-weight: 500;
+            font-size: 0.95rem;
+            cursor: pointer;
+            font-family: inherit;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: var(--primary-text);
+        }
+
+        .btn-primary:hover:not(:disabled) {
+            background-color: var(--primary-hover);
+        }
+
+        .btn-primary:disabled {
+            background-color: var(--bg-card);
+            color: var(--text-muted);
+            border-color: var(--border);
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+
+        /* SECTION 1: UPLOAD */
+        .upload-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            position: relative;
+        }
+
+        input[type="file"] {
+            display: none;
+        }
+
+        .file-label {
+            flex-grow: 1;
+            padding: 0.75rem 1rem;
+            background-color: var(--bg-input);
+            color: var(--text-muted);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            cursor: pointer;
+            text-align: left;
+            font-size: 0.95rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .file-label:hover {
+            border-color: var(--border-hover);
+            color: var(--text-main);
+        }
+
+        /* SECTION 2: ASK */
+        .tabs {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1.5rem;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 0px;
+        }
+
+        .tab {
+            background: transparent;
+            color: var(--text-muted);
+            border: none;
+            padding: 0.75rem 1rem;
+            cursor: pointer;
+            font-weight: 500;
+            font-size: 0.95rem;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -1px;
+        }
+
+        .tab:hover {
+            color: var(--text-main);
+        }
+
+        .tab.active {
+            color: var(--text-main);
+            border-bottom-color: var(--text-main);
+        }
+
+        .input-group {
+            display: flex;
+            gap: 1rem;
+        }
+
+        input[type="text"] {
+            flex-grow: 1;
+            background-color: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 0.75rem 1rem;
+            color: var(--text-main);
+            font-family: inherit;
+            font-size: 0.95rem;
+            outline: none;
+        }
+
+        input[type="text"]:focus {
+            border-color: var(--border-hover);
+            box-shadow: 0 0 0 2px rgba(102, 102, 102, 0.1);
+        }
+        
+        input[type="text"]::placeholder {
+            color: var(--text-muted);
+        }
+
+        /* MESSAGES & STATUS */
+        .status-msg {
+            margin-top: 1rem;
+            padding: 0.75rem 1rem;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            display: none;
+        }
+
+        .status-msg.success {
+            display: block;
+            background-color: var(--success-bg);
+            color: var(--success);
+            border: 1px solid rgba(0, 112, 243, 0.2);
+        }
+
+        .status-msg.error {
+            display: block;
+            background-color: var(--error-bg);
+            color: var(--error);
+            border: 1px solid rgba(238, 0, 0, 0.2);
+        }
+
+        .loader-container {
+            display: none;
+            align-items: center;
+            gap: 0.75rem;
+            margin-top: 1rem;
+        }
+
+        .loader {
+            width: 18px;
+            height: 18px;
+            border: 2px solid var(--border);
+            border-radius: 50%;
+            border-top-color: var(--text-main);
+            animation: spin 0.8s linear infinite;
+        }
+
+        .loader-text {
+            color: var(--text-muted);
+            font-size: 0.9rem;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* RESPONSE AREA */
+        .response-card {
+            margin-top: 1.5rem;
+            display: none;
+        }
+
+        .response-card.visible {
+            display: block;
+        }
+        
+        .response-header {
+            margin-bottom: 1rem;
+            padding-bottom: 0.75rem;
+            border-bottom: 1px solid var(--divider);
+        }
+
+        .response-badge {
+            background-color: var(--border);
+            color: var(--text-main);
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.65rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 0.5rem;
+            display: inline-block;
+        }
+
+        .response-question {
+            font-weight: 500;
+            color: var(--text-main);
+            font-size: 0.95rem;
+        }
+
+        .response-content {
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: var(--text-main);
+        }
+
+        .response-content p { margin-bottom: 1rem; }
+        .response-content p:last-child { margin-bottom: 0; }
+        
+        .response-content ul {
+            padding-left: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        .response-content li { margin-bottom: 0.5rem; }
+
+        .mcq-box {
+            background-color: var(--bg-input);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+        }
+        .mcq-box:last-child { margin-bottom: 0; }
+
+        /* FOOTER */
+        footer {
+            border-top: 1px solid var(--divider);
+            padding: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            background-color: var(--bg-body);
+        }
+
+        footer a {
+            color: var(--text-main);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        footer a:hover {
+            color: var(--primary-hover);
+            text-decoration: underline;
+        }
+
+        /* Utilities */
+        .hidden { display: none !important; }
+        
+        /* Disable ask section initially */
+        .section-ask {
+            opacity: 0.4;
+            pointer-events: none;
+        }
+        .section-ask.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        @media (max-width: 600px) {
+            footer {
+                flex-direction: column;
+                gap: 1rem;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- HEADER -->
+    <header>
+        <a href="#" class="logo">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/>
+            </svg>
+            StudyMind AI
+        </a>
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle Dark Mode">
+            <!-- Moon Icon (for Light Mode) -->
+            <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+            </svg>
+            <!-- Sun Icon (for Dark Mode) -->
+            <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="5"></circle>
+                <line x1="12" y1="1" x2="12" y2="3"></line>
+                <line x1="12" y1="21" x2="12" y2="23"></line>
+                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                <line x1="1" y1="12" x2="3" y2="12"></line>
+                <line x1="21" y1="12" x2="23" y2="12"></line>
+                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+            </svg>
+        </button>
+    </header>
+
+    <!-- MAIN CONTENT -->
+    <main>
+        <!-- UPLOAD SECTION -->
+        <section class="card">
+            <div class="section-header">
+                <h2>1. Upload PDF</h2>
+                <p>Select your study material to get started.</p>
+            </div>
+            
+            <div class="upload-wrapper">
+                <input type="file" id="pdfFileInput" accept="application/pdf">
+                <label for="pdfFileInput" class="file-label" id="pdfFileLabel">
+                    <span id="pdfFileName">Click or drag a PDF file here...</span>
+                </label>
+                <button id="uploadBtn" class="btn btn-primary" disabled>Upload</button>
+            </div>
+            
+            <div id="uploadLoader" class="loader-container">
+                <div class="loader"></div>
+                <span class="loader-text">Extracting and chunking text...</span>
+            </div>
+            
+            <div id="uploadStatus" class="status-msg"></div>
+        </section>
+
+        <!-- ASK SECTION -->
+        <section class="card section-ask" id="askSection">
+            <div class="section-header">
+                <h2>2. Ask Questions</h2>
+                <p>Analyze your document using different modes.</p>
+            </div>
+            
+            <div class="tabs">
+                <button class="tab active" data-mode="chat">Chat</button>
+                <button class="tab" data-mode="quiz">Quiz</button>
+                <button class="tab" data-mode="summary">Summary</button>
+                <button class="tab" data-mode="eli5">ELI5</button>
+            </div>
+
+            <div class="input-group" id="askInputGroup">
+                <input type="text" id="questionInput" placeholder="Ask anything about the uploaded PDF...">
+                <button id="askBtn" class="btn btn-primary">Ask</button>
+            </div>
+
+            <div id="askLoader" class="loader-container">
+                <div class="loader"></div>
+                <span class="loader-text" id="askLoaderText">Connecting to Groq...</span>
+            </div>
+
+            <div id="askStatus" class="status-msg"></div>
+
+            <!-- RESPONSE AREA -->
+            <div class="card response-card" id="responseCard">
+                <div class="response-header">
+                    <div class="response-badge" id="resModeBadge">Mode</div>
+                    <div class="response-question" id="resQuestionText">Question</div>
+                </div>
+                <div class="response-content" id="resContent"></div>
+            </div>
+        </section>
+    </main>
+
+    <!-- FOOTER -->
+    <footer>
+        <div>&copy; 2026 StudyMind AI. All rights reserved.</div>
+        <div style="opacity: 0.8; font-size: 0.8rem;">
+            <a href="https://github.com/yaadhuu" target="_blank" rel="noopener noreferrer">GitHub &rarr; yaadhuu</a>
+        </div>
+    </footer>
+
+    <!-- LOGIC -->
+    <script>
+        const API_URL = 'http://127.0.0.1:8000';
+        let collection_name = null;
+        let currentMode = 'chat';
+
+        /* --- THEME TOGGLE --- */
+        const themeToggle = document.getElementById('themeToggle');
+        const htmlElement = document.documentElement;
+
+        // Check local storage for theme
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        htmlElement.setAttribute('data-theme', savedTheme);
+
+        themeToggle.addEventListener('click', () => {
+            const currentTheme = htmlElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+            htmlElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+        });
+
+        /* --- DOM ELEMENTS --- */
+        // Upload
+        const pdfFileInput = document.getElementById('pdfFileInput');
+        const pdfFileLabel = document.getElementById('pdfFileLabel');
+        const pdfFileName = document.getElementById('pdfFileName');
+        const uploadBtn = document.getElementById('uploadBtn');
+        const uploadLoader = document.getElementById('uploadLoader');
+        const uploadStatus = document.getElementById('uploadStatus');
+        
+        // Ask
+        const askSection = document.getElementById('askSection');
+        const tabs = document.querySelectorAll('.tab');
+        const questionInput = document.getElementById('questionInput');
+        const askBtn = document.getElementById('askBtn');
+        const askLoader = document.getElementById('askLoader');
+        const askLoaderText = document.getElementById('askLoaderText');
+        const askStatus = document.getElementById('askStatus');
+        const responseCard = document.getElementById('responseCard');
+        const resModeBadge = document.getElementById('resModeBadge');
+        const resQuestionText = document.getElementById('resQuestionText');
+        const resContent = document.getElementById('resContent');
+
+        /* --- SECTION 1: UPLOAD PDF --- */
+        pdfFileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                const file = e.target.files[0];
+                if (file.type !== 'application/pdf') {
+                    showStatus(uploadStatus, 'Only PDF files are allowed.', 'error');
+                    uploadBtn.disabled = true;
+                    pdfFileName.textContent = 'Click or drag a PDF file here...';
+                    return;
+                }
+                pdfFileName.textContent = file.name;
+                pdfFileLabel.style.borderColor = 'var(--text-main)';
+                uploadBtn.disabled = false;
+                uploadStatus.style.display = 'none'; 
+            } else {
+                pdfFileName.textContent = 'Click or drag a PDF file here...';
+                uploadBtn.disabled = true;
+                pdfFileLabel.style.borderColor = 'var(--border)';
+            }
+        });
+
+        uploadBtn.addEventListener('click', async () => {
+            const file = pdfFileInput.files[0];
+            if (!file) return;
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            // UI updating
+            uploadBtn.disabled = true;
+            pdfFileInput.disabled = true;
+            uploadLoader.style.display = 'flex';
+            uploadStatus.style.display = 'none';
+            
+            try {
+                const response = await fetch(`${API_URL}/upload-pdf/`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // STORE COLLECTION NAME
+                    collection_name = data.collection_name;
+                    
+                    showStatus(uploadStatus, `Successfully processed ${data.filename}. (${data.total_chunks} total chunks)`, 'success');
+                    
+                    // Unlock Ask Section
+                    askSection.classList.add('active');
+                    if (currentMode === 'chat' || currentMode === 'eli5') questionInput.focus();
+                } else {
+                    showStatus(uploadStatus, data.detail || 'Upload failed.', 'error');
+                    uploadBtn.disabled = false;
+                }
+            } catch (error) {
+                console.error('Upload Error:', error);
+                showStatus(uploadStatus, 'Server error. Is the backend running on port 8000?', 'error');
+                uploadBtn.disabled = false;
+            } finally {
+                uploadLoader.style.display = 'none';
+                pdfFileInput.disabled = false;
+            }
+        });
+
+        /* --- SECTION 2: ASK QUESTIONS --- */
+        // Mode switching
+        tabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                tabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                currentMode = tab.dataset.mode;
+                
+                if (currentMode === 'quiz' || currentMode === 'summary') {
+                    questionInput.style.display = 'none';
+                    askBtn.textContent = currentMode === 'quiz' ? 'Generate Quiz' : 'Summarize';
+                    askBtn.style.flexGrow = '1';
+                } else {
+                    questionInput.style.display = 'block';
+                    questionInput.placeholder = currentMode === 'eli5' ? 'Enter a complex concept to simplify...' : 'Ask anything about the uploaded PDF...';
+                    askBtn.textContent = 'Ask';
+                    askBtn.style.flexGrow = '0';
+                    if(collection_name) questionInput.focus();
+                }
+            });
+        });
+
+        // Response Formatter
+        const formatResponseText = (text, mode) => {
+            if (!text) return '';
+            
+            if (mode === 'quiz') {
+                const questions = [];
+                const regex = /Q\d+:\s*([\s\S]*?)\s+(A\)[\s\S]*?)\s+ANSWER:\s*([\s\S]*?)\s+EXPLANATION:\s*([\s\S]*?)(?=Q\d+:|$)/gi;
+                let match;
+                while ((match = regex.exec(text)) !== null) {
+                    questions.push({
+                        q: match[1].trim(),
+                        options: match[2].trim().replace(/\n/g, '<br>'),
+                        ans: match[3].trim(),
+                        exp: match[4].trim()
+                    });
+                }
+                
+                if (questions.length === 0) {
+                     // Fallback if parsing fails
+                     const blocks = text.split(/\n\n+/);
+                     return blocks.map(block => {
+                         if (!block.trim()) return '';
+                         return `<div class="mcq-box">${block.trim().replace(/\n/g, '<br>')}</div>`;
+                     }).join('');
+                }
+
+                return questions.map((q, i) => `
+                    <div class="mcq-box" style="cursor: pointer; position: relative;" onclick="const ans = this.querySelector('.hidden-answer'); ans.style.display = ans.style.display === 'none' ? 'block' : 'none';">
+                        <div style="font-weight: 600; margin-bottom: 0.5rem; padding-right: 20px;">Q${i+1}: ${q.q}</div>
+                        <div style="margin-bottom: 1rem; color: var(--text-muted);">${q.options}</div>
+                        <div style="font-size: 0.8rem; color: var(--success); font-weight: 500; margin-bottom: 0.5rem;">Click to reveal answer</div>
+                        <div class="hidden-answer" style="display: none; margin-top: 1rem; padding: 1rem; background: var(--success-bg); border-left: 3px solid var(--success); border-radius: 4px;">
+                            <strong>Answer:</strong> ${q.ans}<br><br>
+                            <strong>Explanation:</strong> ${q.exp}
+                        </div>
+                    </div>
+                `).join('');
+            } 
+            else if (mode === 'summary') {
+                // Try to detect lists or asterisks and format cleanly
+                const lines = text.split('\n');
+                let inList = false;
+                let html = '';
+                
+                lines.forEach(line => {
+                    const cleanLine = line.trim();
+                    if (cleanLine.startsWith('- ') || cleanLine.startsWith('* ') || /^\d+\.\s/.test(cleanLine)) {
+                        if (!inList) { html += '<ul>'; inList = true; }
+                        const content = cleanLine.replace(/^[-*]\s/, '').replace(/^\d+\.\s/, '');
+                        html += `<li>${content}</li>`;
+                    } else if (cleanLine) {
+                        if (inList) { html += '</ul>'; inList = false; }
+                        html += `<p>${cleanLine}</p>`;
+                    }
+                });
+                
+                if (inList) html += '</ul>';
+                return html || `<p>${text}</p>`;
+            } 
+            else {
+                // Standard block output
+                return text.split(/\n\n+/).map(p => p.trim() ? `<p>${p}</p>` : '').join('');
+            }
+        };
+
+        // Submit Action
+        const handleAsk = async () => {
+            let question = questionInput.value.trim();
+            
+            // Hardcode question for specific modes to avoid errors
+            if (currentMode === 'quiz') question = "generate quiz";
+            if (currentMode === 'summary') question = "summarize";
+            
+            if (!question || !collection_name) return;
+
+            // UI State updates
+            askBtn.disabled = true;
+            questionInput.disabled = true;
+            askLoader.style.display = 'flex';
+            
+            if (currentMode === 'quiz') askLoaderText.textContent = 'Generating 5 MCQ questions...';
+            else if (currentMode === 'summary') askLoaderText.textContent = 'Summarizing text chunks...';
+            else askLoaderText.textContent = 'Fetching response from Groq...';
+            
+            askStatus.style.display = 'none';
+            responseCard.classList.remove('visible');
+
+            // URL Parameters
+            const params = new URLSearchParams({
+                collection_name: collection_name,
+                question: question,
+                mode: currentMode
+            });
+
+            try {
+                const response = await fetch(`${API_URL}/ask/?${params.toString()}`, {
+                    method: 'POST'
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    // Update layout
+                    resModeBadge.textContent = data.mode;
+                    resQuestionText.textContent = currentMode === 'quiz' ? 'Multiple Choice Questions' : 
+                                                  currentMode === 'summary' ? 'Document Summary' : 
+                                                  data.question;
+                    
+                    resContent.innerHTML = formatResponseText(data.answer, data.mode);
+                    responseCard.classList.add('visible');
+                    
+                    if (currentMode === 'chat' || currentMode === 'eli5') questionInput.value = '';
+                } else {
+                    showStatus(askStatus, data.detail || 'Failed to fetch answer.', 'error');
+                }
+            } catch (error) {
+                console.error('Ask Error:', error);
+                showStatus(askStatus, 'Connection to backend failed.', 'error');
+            } finally {
+                askLoader.style.display = 'none';
+                askBtn.disabled = false;
+                questionInput.disabled = false;
+                if(currentMode === 'chat' || currentMode === 'eli5') questionInput.focus();
+            }
+        };
+
+        askBtn.addEventListener('click', handleAsk);
+        questionInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') handleAsk();
+        });
+
+        /* --- HELPER --- */
+        function showStatus(elem, msg, type) {
+            elem.textContent = msg;
+            elem.className = `status-msg ${type}`;
+        }
+    </script>
+</body>
+</html>
