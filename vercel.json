@@ -3,6 +3,10 @@
     {
       "src": "main.py",
       "use": "@vercel/python"
+    },
+    {
+      "src": "index.html",
+      "use": "@vercel/static"
     }
   ],
   "rewrites": [
@@ -11,8 +15,20 @@
       "destination": "/main.py"
     },
     {
+      "source": "/upload-pdf/",
+      "destination": "/main.py"
+    },
+    {
       "source": "/ask/(.*)",
       "destination": "/main.py"
+    },
+    {
+      "source": "/ask/",
+      "destination": "/main.py"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/index.html"
     }
   ]
 }
