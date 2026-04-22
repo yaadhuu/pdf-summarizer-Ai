@@ -52,7 +52,7 @@ async def upload_pdf(file: UploadFile = File(...)):
     }
 
 @app.post("/ask/")
-async def ask_question(collection_name: str, question: str, mode: str = "chat"):
+async def ask_question(collection_name: str, mode: str = "chat", question: str = ""):
     
  
     if collection_name not in collections:
@@ -61,8 +61,16 @@ async def ask_question(collection_name: str, question: str, mode: str = "chat"):
   
     collection = collections[collection_name]
     
-  
-    relevant_chunks = query_chunks(collection, question)
+    if mode == "summary":
+        # Get all chunks instead of searching for relevance
+        results = collection.get()
+        relevant_chunks = results["documents"]
+        # Limit to 100 chunks roughly matching Groq's maximum free tier request limits for context
+        relevant_chunks = relevant_chunks[:100] 
+    else:
+        if not question:
+            raise HTTPException(status_code=400, detail="Question is required for this mode.")
+        relevant_chunks = query_chunks(collection, question)
     
  
     answer = get_answer(question, relevant_chunks, mode)
