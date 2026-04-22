@@ -27,6 +27,14 @@
       "destination": "/main.py"
     },
     {
+      "source": "/upload-and-ask/(.*)",
+      "destination": "/main.py"
+    },
+    {
+      "source": "/upload-and-ask/",
+      "destination": "/main.py"
+    },
+    {
       "source": "/(.*)",
       "destination": "/index.html"
     }

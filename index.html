@@ -539,11 +539,11 @@
 
     <!-- LOGIC -->
     <script>
-        const API_URL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' 
-            ? 'http://127.0.0.1:8000' 
-            : ''; // Use relative paths for production on Vercel
+        const IS_LOCAL = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+        const API_URL = IS_LOCAL ? 'http://127.0.0.1:8000' : '';
         let collection_name = null;
         let currentMode = 'chat';
+        let uploadedFile = null; // Store the file for re-use in combined endpoint
 
         /* --- THEME TOGGLE --- */
         const themeToggle = document.getElementById('themeToggle');
@@ -607,6 +607,9 @@
             const file = pdfFileInput.files[0];
             if (!file) return;
 
+            // Store the file for later re-use on production (combined endpoint)
+            uploadedFile = file;
+
             const formData = new FormData();
             formData.append('file', file);
 
@@ -664,7 +667,7 @@
                     questionInput.placeholder = currentMode === 'eli5' ? 'Enter a complex concept to simplify...' : 'Ask anything about the uploaded PDF...';
                     askBtn.textContent = 'Ask';
                     askBtn.style.flexGrow = '0';
-                    if(collection_name) questionInput.focus();
+                    if(collection_name || uploadedFile) questionInput.focus();
                 }
             });
         });
@@ -742,7 +745,10 @@
             if (currentMode === 'quiz') question = "generate quiz";
             if (currentMode === 'summary') question = "summarize";
             
-            if (!question || !collection_name) return;
+            // For local: need collection_name; for production: need uploadedFile
+            if (!question) return;
+            if (IS_LOCAL && !collection_name) return;
+            if (!IS_LOCAL && !uploadedFile) return;
 
             // UI State updates
             askBtn.disabled = true;
@@ -756,34 +762,52 @@
             askStatus.style.display = 'none';
             responseCard.classList.remove('visible');
 
-            // URL Parameters
-            const params = new URLSearchParams({
-                collection_name: collection_name,
-                question: question,
-                mode: currentMode
-            });
-
             try {
-                const response = await fetch(`${API_URL}/ask/?${params.toString()}`, {
-                    method: 'POST'
-                });
+                let data;
 
-                const data = await response.json();
-
-                if (response.ok) {
-                    // Update layout
-                    resModeBadge.textContent = data.mode;
-                    resQuestionText.textContent = currentMode === 'quiz' ? 'Multiple Choice Questions' : 
-                                                  currentMode === 'summary' ? 'Document Summary' : 
-                                                  data.question;
-                    
-                    resContent.innerHTML = formatResponseText(data.answer, data.mode);
-                    responseCard.classList.add('visible');
-                    
-                    if (currentMode === 'chat' || currentMode === 'eli5') questionInput.value = '';
+                if (IS_LOCAL) {
+                    // LOCAL DEV: two-step flow (upload already done, just ask)
+                    const params = new URLSearchParams({
+                        collection_name: collection_name,
+                        question: question,
+                        mode: currentMode
+                    });
+                    const response = await fetch(`${API_URL}/ask/?${params.toString()}`, {
+                        method: 'POST'
+                    });
+                    data = await response.json();
+                    if (!response.ok) {
+                        showStatus(askStatus, data.detail || 'Failed to fetch answer.', 'error');
+                        return;
+                    }
                 } else {
-                    showStatus(askStatus, data.detail || 'Failed to fetch answer.', 'error');
+                    // PRODUCTION (Vercel): combined endpoint — re-sends PDF with question
+                    const formData = new FormData();
+                    formData.append('file', uploadedFile);
+                    formData.append('mode', currentMode);
+                    formData.append('question', question);
+
+                    const response = await fetch(`${API_URL}/upload-and-ask/`, {
+                        method: 'POST',
+                        body: formData
+                    });
+                    data = await response.json();
+                    if (!response.ok) {
+                        showStatus(askStatus, data.detail || 'Failed to fetch answer.', 'error');
+                        return;
+                    }
                 }
+
+                // Update layout
+                resModeBadge.textContent = data.mode;
+                resQuestionText.textContent = currentMode === 'quiz' ? 'Multiple Choice Questions' : 
+                                              currentMode === 'summary' ? 'Document Summary' : 
+                                              data.question;
+                
+                resContent.innerHTML = formatResponseText(data.answer, data.mode);
+                responseCard.classList.add('visible');
+                
+                if (currentMode === 'chat' || currentMode === 'eli5') questionInput.value = '';
             } catch (error) {
                 console.error('Ask Error:', error);
                 showStatus(askStatus, 'Connection to backend failed.', 'error');
