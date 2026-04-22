@@ -1,4 +1,7 @@
 from fastapi import FastAPI, HTTPException, UploadFile, File
+from fastapi import Depends
+from pydantic import BaseModel
+import requests
 from pdf_parser import extract_text_from_pdf
 from chunker import split_text_into_chunks
 from embedder import store_chunks, query_chunks
@@ -80,3 +83,35 @@ async def ask_question(collection_name: str, mode: str = "chat", question: str =
         "mode": mode,
         "answer": answer
     }
+
+class SummarizeRequest(BaseModel):
+    url: str
+    mode: str = "summary"
+    question: str = ""
+
+@app.post("/summarize/")
+async def summarize(req: SummarizeRequest):
+    # Fetch content from URL
+    try:
+        response = requests.get(req.url)
+        response.raise_for_status()
+        content = response.text
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Failed to fetch URL: {e}")
+    # Split and store chunks
+    chunks = split_text_into_chunks(content)
+    if not chunks:
+        raise HTTPException(status_code=400, detail="No content extracted from URL.")
+    collection_name = f"url_{uuid.uuid4().hex}"
+    client, collection = store_chunks(chunks, collection_name)
+    collections[collection_name] = collection
+    # Determine relevant chunks based on mode
+    if req.mode == "summary":
+        results = collection.get()
+        relevant_chunks = results["documents"][:100]
+    else:
+        if not req.question:
+            raise HTTPException(status_code=400, detail="Question is required for this mode.")
+        relevant_chunks = query_chunks(collection, req.question)
+    answer = get_answer(req.question, relevant_chunks, req.mode)
+    return {"answer": answer, "mode": req.mode, "url": req.url}
